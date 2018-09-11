@@ -1,5 +1,5 @@
 var GPIO = require('onoff').Gpio;
-const ketiCiotClient = require('./lib/keti.ciot.client.js');
+const ketiCiotClient = require('ciot-databus-client');
 
 var ledPin = 18;    //  BCM 18, wPi 1, Phy 12
 var buttonPin = 17; //  BCM 17, wPi 0, Phy 11
