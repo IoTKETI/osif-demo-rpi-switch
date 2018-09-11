@@ -1,32 +1,57 @@
 var GPIO = require('onoff').Gpio;
 
-//  Define constants
-//  GPIO pin number
-var CONST_PIN_LED     = 18;
-var CONST_PIN_SWITCH  = 17;
+//
+//  'onoff' library use BCM pin number
+//
+var led1PinBCM    = 17;    //  Phy 11, wPi 0, BCM 17
+var led2PinBCM    = 27;    //  Phy 13, wPi 2, BCM 27
+var buttonPinBCM  = 22;    //  Phy 15, wPi 3, BCM 22
 
-//  GPIO configuration
-var led     = new GPIO(CONST_PIN_LED, 'out');
-var button  = new GPIO(CONST_PIN_SWITCH, 'in', 'both');
 
-//  LED 상태 변경
+var led1 = new GPIO(led1PinBCM, 'out');
+var led2 = new GPIO(led2PinBCM, 'out');
+var button = new GPIO(buttonPinBCM, 'in', 'both');
+
+var ledState = 0;
+
 function light(err, state) {
 
-    //  입력 신호가 1인 경우 LED를 킨다
-    if (state == 1) {
-        led.writeSync(1);
-        console.log('light on');
-    }
+    if(state === 1)
+        ledState = (ledState+1)%4;
 
-    //  입력 신호가 1이 아닌 경우 LED를 끈다
-    else {
-        led.writeSync(0);
-        console.log('light off');
-    }
+  switch(ledState) {
+    case  0:
+      led1.writeSync(0);
+      led2.writeSync(0);
+      break;
+
+    case  1:
+      led1.writeSync(0);
+      led2.writeSync(1);
+      break;
+
+    case  2:
+      led1.writeSync(1);
+      led2.writeSync(0);
+      break;
+
+    case  3:
+      led1.writeSync(1);
+      led2.writeSync(1);
+      break;
+  }
 }
 
 
-//  switch의 상태 변화를 모니터링한다  상태가 변경되면 callback 함수를 호출한다
+
+console.log('start');
 button.watch(light);
 
 
+
+process.on('SIGINT', function () {
+    console.log( 'exit');
+});
+process.on('SIGTERM', function () {
+  console.log( 'exit');
+});
