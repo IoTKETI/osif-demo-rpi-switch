@@ -14,6 +14,7 @@ var button = new GPIO(buttonPinBCM, 'in', 'both');
 
 
 var LED_OFF = 0;
+var LED_ON = 2;
 
 
 function controlLED(ledState) {
@@ -46,49 +47,6 @@ function controlLED(ledState) {
       break;
   }
 }
-//
-//
-// var listener = {
-//     'updated': function(arg1, arg2, arg3){
-//         console.log( arguments );
-//
-//         ketiCiotClient.getValue(ketiCiotClient.KEYS.CIOT_DEMO_SWITCH, arg1)
-//             .then(function(value){
-//                 if (value == 'on') {
-//                     led.writeSync(1);
-//                     console.log('light on');
-//                 }
-//                 else {
-//                     led.writeSync(0);
-//                     console.log('light off');
-//                 }            })
-//             .catch(function(err){
-//                 console.log( err );
-//             });
-//
-//     }
-// }
-//
-// //
-// ketiCiotClient.setEventListener(ketiCiotClient.KEYS.CIOT_DEMO_SWITCH, 'state', listener)
-//     .then(function(result){
-//         console.log( 'evnet listener result: ', result );
-//     })
-//
-//
-//
-//
-// ketiCiotClient.setValue(ketiCiotClient.KEYS.CIOT_PROCESS, 'demo-led', {state: 'run', instanceid: '383f327dd3'})
-//     .then(function(value){
-//         console.log( value );
-//
-//     })
-//     .catch(function(err){
-//         console.log( err );
-//     });
-//
-//
-//
 
 
 var serviceOptions = require('./ciotservice.json');
@@ -97,13 +55,17 @@ var client1 = new CiotDatabusClient(serviceOptions);
 
 var ledState = LED_OFF;
 
+var g_SensorControlState = false;
+
 function onButtonPushed(err, state) {
   if(state === 0) {
-    ledState = (ledState+1)%4;
 
-    // controlLED(ledState);
-    console.log('BUTTON PUSHED : SET GLOBAL APP DATA: iotweek-led-state : ', ledState);
-    client1.setGlobalAppData("iotweek-led-state", ledState);
+    g_SensorControlState = !g_SensorControlState;
+
+    console.log('BUTTON PUSHED : SET GLOBAL APP DATA: iotweek-led-state : ', g_SensorControlState);
+    client1.setGlobalAppData("iotweek-sensor-control", g_SensorControlState);
+
+    controlLED(g_SensorControlState ? LED_ON : LED_OFF);
 
   }
   else {
@@ -114,50 +76,27 @@ function onButtonPushed(err, state) {
 
 function serviceStart() {
 
-
-
   client1.init()
     .then(function(client){
       client.startService()
-        .then(function(value){
-          console.log( 'startService', value );
+        .then(function(value) {
+          console.log('startService', value);
+
+
+          return client1.getGlobalAppData("iotweek-sensor-control");
+        })
+
+        .then(function(controlValue){
+          g_SensorControlState = controlValue;
 
 
           //  LED Off
-          controlLED(LED_OFF);
+          controlLED(g_SensorControlState ? LED_ON : LED_OFF);
 
           //  Start watch changing state of button.
           button.watch(onButtonPushed);
-
-
-
-
-          var listener = {
-            'updated':     function listener(key, arg1, arg2, arg3, arg4) {
-              console.log('GLOBAL OPENDATA UPDATED : value : ', key, arg1, arg2, arg3, arg4);
-
-              client1.getGlobalAppData(key)
-                .then((value)=>{
-                  console.log('LISTENER : getGlobalAppData : ', value);
-                  ledState = value;
-
-                  controlLED(value);
-                })
-
-
-
-            }
-          };
-
-          client.subscribeToGlobalOpendata('iotweek-led-state', listener);
-
-        })
-
-      ;
+        });
     });
-
-
-
 
 
   console.log('Service start...');
