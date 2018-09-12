@@ -4,7 +4,7 @@
   "description": "This README would normally document whatever steps are necessary to get your application up and running.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "DEBUG=ciot-databus-client node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,8 +15,8 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/synctechnoinc/demo-gpio#readme",
   "dependencies": {
-    "ciot-databus-client": "^1.1.0",
     "hazelcast-client": "^0.6.1",
-    "onoff": "^1.1.8"
+    "onoff": "^1.1.8",
+    "uuid": "^3.3.2"
   }
 }

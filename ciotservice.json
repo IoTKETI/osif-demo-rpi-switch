@@ -20,8 +20,11 @@
     "serviceDesc": "IoT Week 2018 Demo service"
   },
   "databus": {
-    "globalHost": "dev.synctechno.com",
+    "globalHost": "13.124.60.44",
     "globalPort": "5701",
     "localPort": "5701"
+  },
+  "backup": {
+    "globalHost": "dev.synctechno.com"
   }
 }
