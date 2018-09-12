@@ -1,44 +1,64 @@
 var GPIO = require('onoff').Gpio;
-const ketiCiotClient = require('ciot-databus-client');
+var CiotDatabusClient = require('ciot-databus-client').Client;
 
-var ledPin = 18;    //  BCM 18, wPi 1, Phy 12
-var buttonPin = 17; //  BCM 17, wPi 0, Phy 11
-
-
-var led1PinBCM    = 17;    //  Phy 11, wPi 0, BCM 17
-var led2PinBCM    = 27;    //  Phy 13, wPi 2, BCM 27
+var ledRPinBCM    = 18;    //  Phy 12, wPi 1, BCM 18
+var ledGPinBCM    = 17;    //  Phy 11, wPi 0, BCM 17
+var ledBPinBCM    = 27;    //  Phy 13, wPi 2, BCM 27
 var buttonPinBCM  = 22;    //  Phy 15, wPi 3, BCM 22
 
 
-var led1 = new GPIO(led1PinBCM, 'out');
-var led2 = new GPIO(led2PinBCM, 'out');
+var ledR = new GPIO(ledRPinBCM, 'out');
+var ledG = new GPIO(ledGPinBCM, 'out');
+var ledB = new GPIO(ledBPinBCM, 'out');
 var button = new GPIO(buttonPinBCM, 'in', 'both');
 
-function light(err, state) {
 
-  switch(state) {
-    case  0:
-      led1.writeSync(0);
-      led2.writeSync(0);
-      break;
+var LED_OFF = 0;
 
-    case  1:
-      led1.writeSync(0);
-      led2.writeSync(1);
-      break;
 
-    case  2:
-      led1.writeSync(1);
-      led2.writeSync(0);
-      break;
+var ledState = 0;
 
-    case  3:
-      led1.writeSync(1);
-      led2.writeSync(1);
-      break;
+function onButtonPushed(err, state) {
+  if(state === 0) {
+    ledState = (ledState+1)%4;
+
+    controlLED(ledState);
+  }
+  else {
+    return;
   }
 }
 
+function controlLED(ledState) {
+
+  console.log( "controlLED: ", ledState)
+
+  switch(ledState) {
+    case  0:
+      ledR.writeSync(1);
+      ledG.writeSync(1);
+      ledB.writeSync(1);
+      break;
+
+    case  1:
+      ledR.writeSync(0);
+      ledG.writeSync(1);
+      ledB.writeSync(1);
+      break;
+
+    case  2:
+      ledR.writeSync(1);
+      ledG.writeSync(0);
+      ledB.writeSync(1);
+      break;
+
+    case  3:
+      ledR.writeSync(1);
+      ledG.writeSync(1);
+      ledB.writeSync(0);
+      break;
+  }
+}
 
 
 var listener = {
@@ -80,9 +100,47 @@ ketiCiotClient.setValue(ketiCiotClient.KEYS.CIOT_PROCESS, 'demo-led', {state: 'r
         console.log( err );
     });
 
-console.log('start');
-button.watch(light);
 
+
+
+
+var serviceOptions = require('./ciotservice.json');
+var client1 = new CiotDatabusClient(options);
+
+
+
+
+
+
+function serviceStart() {
+
+
+
+  client1.init()
+    .then(function(client){
+      client.startService()
+        .then(function(value){
+          console.log( 'startService', value );
+
+
+          //  LED Off
+          controlLED(LED_OFF);
+
+          //  Start watch changing state of button.
+          button.watch(onButtonPushed);
+
+
+        })
+
+      ;
+    });
+
+
+
+
+
+  console.log('Service start...');
+}
 
 
 function serviceShutdown() {
@@ -105,3 +163,9 @@ process.on('SIGINT', function () {
 process.on('SIGTERM', function () {
     serviceShutdown();
 });
+
+
+
+
+//
+serviceStart();
