@@ -1,5 +1,5 @@
 var GPIO = require('onoff').Gpio;
-var OSIFClient = require('osif-client');
+var OSIFClient = require('osif-client').Client;
 
 var ledRPinBCM    = 18;    //  Phy 12, wPi 1, BCM 18
 var ledGPinBCM    = 17;    //  Phy 11, wPi 0, BCM 17
