@@ -1,5 +1,5 @@
 var GPIO = require('onoff').Gpio;
-var CiotDatabusClient = require('./lib/ciot.databus.client.js');
+var OSIFClient = require('osif-client');
 
 var ledRPinBCM    = 18;    //  Phy 12, wPi 1, BCM 18
 var ledGPinBCM    = 17;    //  Phy 11, wPi 0, BCM 17
@@ -50,7 +50,7 @@ function controlLED(ledState) {
 
 
 var serviceOptions = require('./ciotservice.json');
-var client1 = new CiotDatabusClient(serviceOptions);
+var client1 = new OSIFClient(serviceOptions);
 
 
 var ledState = LED_OFF;
