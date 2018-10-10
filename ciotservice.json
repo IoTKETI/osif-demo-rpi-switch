@@ -1,0 +1,30 @@
+{
+  "service": {
+    "serviceName": "iotweek-demo-button",
+    "versionCode": {
+      "major": 1,
+      "minor": 0,
+      "revision": 5
+    },
+    "creator": "SyncTechno",
+    "openData": {
+      "local": [],
+      "global": [
+        {
+          "name": "iotweek-sensor-control",
+          "description": "Sensor controll service point",
+          "template": "true | false, if this value is true, sensor write sensing value to both Mobius and local OSIF data grid, otherwise sensor write sensing value to only Mobius"
+        }
+      ]
+    },
+    "serviceDesc": "IoT Week 2018 Demo service"
+  },
+  "databus": {
+    "globalHost": "13.124.60.44",
+    "globalPort": "5701",
+    "localPort": "5701"
+  },
+  "backup": {
+    "globalHost": "dev.synctechno.com"
+  }
+}
